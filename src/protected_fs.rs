@@ -290,10 +290,6 @@ mod tests {
             assert_eq!(opt.is_err(), true);
         }
         {
-            let opt = ProtectedFile::open_ex("/dev/isgx", &key);
-            assert_eq!(opt.is_ok(), true);
-        }
-        {
             let opt = ProtectedFile::create_ex("/", &key);
             assert_eq!(opt.is_err(), true);
         }
