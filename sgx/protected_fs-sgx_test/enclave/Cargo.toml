@@ -1,0 +1,25 @@
+[package]
+name = "Helloworldsampleenclave"
+version = "1.0.0"
+authors = ["Baidu"]
+edition = "2018"
+
+[lib]
+name = "helloworldsampleenclave"
+crate-type = ["staticlib"]
+
+[features]
+default = ["protected_fs_rs/mesalock_sgx"]
+
+[dependencies]
+protected_fs_rs = { path = "../../../", default-features = false, optional = true}
+rdrand      = { git = "https://github.com/mesalock-linux/rust_rdrand-sgx", default-features = false }
+rand_core   = { version = "0.4", default-features = false }
+
+[target.'cfg(not(target_env = "sgx"))'.dependencies]
+sgx_types = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tstd = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tunittest = {rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+
+[profile.release]
+lto = false

@@ -1,0 +1,30 @@
+[package]
+name = "protected_fs_rs"
+version = "0.0.1"
+authors = ["MesaTEE Authors <developers@mesatee.org>"]
+description = "Ported sgx_protected_fs (Intel SGX SDK) running out side sgx with Rust bindings."
+license-file = "Apache-2.0"
+edition = "2018"
+
+[lib]
+name = "protected_fs"
+
+[features]
+default = ["libc"]
+mesalock_sgx = ["sgx_tstd", "sgx_types", "sgx_trts"]
+
+[dependencies]
+cfg-if      = { version = "0.1.9" }
+libc        = { git = "https://github.com/mesalock-linux/libc-sgx", optional = true }
+rdrand      = { git = "https://github.com/mesalock-linux/rust_rdrand-sgx", default-features = false }
+rand_core   = { version = "0.4", default-features = false }
+
+[target.'cfg(not(target_env = "sgx"))'.dependencies]
+sgx_types = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }
+sgx_tstd = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }
+sgx_trts = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }
+
+
+[build-dependencies]
+cfg-if      = { version = "0.1.9" }
+cmake       = { version = "0.1" }
