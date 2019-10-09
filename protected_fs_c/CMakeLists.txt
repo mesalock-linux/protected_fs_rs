@@ -24,11 +24,8 @@ elseif (NOT EXISTS ${SGX_SDK})
     message(FATAL_ERROR "$SGX_SDK directory must exist")
 else ()
     message("SGX_SDK=${SGX_SDK}")
-    message("SGX_MODE=${SGX_MODE}")
 
-    set(SGX_EDGER8R ${SGX_SDK}/bin/x64/sgx_edger8r)
     set(SGX_LIBRARY_PATH  ${SGX_SDK}/lib64)
-
     set(SGX_COMMON_CFLAGS  -m64 -O2)
     set(SGX_UNTRUSTED_CFLAGS  ${SGX_COMMON_CFLAGS} -fPIC -Wno-attributes
         -I${SGX_SDK}/include)
@@ -42,9 +39,6 @@ else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-shadow -Wno-missing-field-initializers -Wno-unused-parameter")
     set(${PROJECT_NAME}_sgx_tprotected_fs_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SGX_TRUSTED_CFLAGS}")
     set(${PROJECT_NAME}_sgx_uprotected_fs_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SGX_UNTRUSTED_CFLAGS}")
-    #execute_process(
-    #    COMMAND ${SGX_EDGER8R} "--header-only --trusted sgx_tprotected_fs.edl --search-path $(SGX_SDK)/include"
-    #)
 endif (NON_SGX_PROTECTED_FS)
 
 add_subdirectory (sgx_tprotected_fs)
