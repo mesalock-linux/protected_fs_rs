@@ -1,16 +1,19 @@
-// Copyright 2019 MesaTEE Authors
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 #include "protected_fs_config.h"
 
@@ -390,11 +393,48 @@ int32_t protected_fs_file::clear_cache()
 
 int32_t protected_fs_file::get_current_meta_gmac(sgx_aes_gcm_128bit_tag_t out_gmac) {
 	if (out_gmac == NULL) {
-		return 1;
+		last_error = EINVAL;
+		return -1;
 	}
 
 	sgx_thread_mutex_lock(&mutex);
 	memcpy(out_gmac, file_meta_data.plain_part.meta_data_gmac, sizeof(sgx_aes_gcm_128bit_tag_t));
 	sgx_thread_mutex_unlock(&mutex);
+	return 0;
+}
+
+
+int32_t protected_fs_file::rename_meta(const char* old_name, const char* new_name) {
+	if ((old_name == NULL) || (new_name == NULL)) {
+		last_error = EINVAL;
+		return -1;
+	}
+
+	if (strnlen(old_name, FILENAME_MAX_LEN) >= FILENAME_MAX_LEN-1)
+	{
+		last_error = ENAMETOOLONG;
+		return -1;
+	}
+
+	if (strnlen(new_name, FILENAME_MAX_LEN) >= FILENAME_MAX_LEN-1)
+	{
+		last_error = ENAMETOOLONG;
+		return -1;
+	}
+
+	if (strncmp(old_name, encrypted_part_plain.clean_filename, FILENAME_MAX_LEN) != 0)
+	{
+		last_error = SGX_ERROR_FILE_NAME_MISMATCH;
+		return -1;
+	}
+
+	strncpy(encrypted_part_plain.clean_filename, new_name, FILENAME_MAX_LEN);
+
+	need_writing = true;
+	bool success = internal_flush(true);
+	if (success == false) {
+		last_error = SGX_ERROR_FILE_FLUSH_FAILED;
+		return -1;
+	}
 	return 0;
 }

@@ -1,16 +1,19 @@
-// Copyright 2019 MesaTEE Authors
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 
 /**
@@ -259,14 +262,37 @@ int32_t SGXAPI sgx_fimport_auto_key(const char* filename, const sgx_key_128bit_t
 */
 int32_t SGXAPI sgx_fclear_cache(SGX_FILE* stream);
 
-/*
-*
-*
-*/
+
 #define SGX_AESGCM_MAC_SIZE             16
 typedef uint8_t aead_128bit_tag_t[SGX_AESGCM_MAC_SIZE];
 typedef aead_128bit_tag_t sgx_aes_gcm_128bit_tag_t;
+
+
+/* sgx_get_current_meta_gmac
+* Purpose: 
+*
+* Parameters:
+*     stream - [IN] the file handle
+*     out_gmac - [OUT] the current meta_data_gmac of the file
+*
+* Return value: 
+*     int32_t  - result, 0 - success, 1 - there was an error, check sgx_ferror for error code
+*/
 int32_t SGXAPI sgx_get_current_meta_gmac(SGX_FILE* stream, sgx_aes_gcm_128bit_tag_t out_gmac);
+
+
+/* sgx_rename_meta
+* Purpose: 
+*
+* Parameters:
+*     stream - [IN] the file handle
+*     old_name - [IN] the existing file name
+*     new_name - [IN] the new name
+*
+* Return value: 
+*     int32_t  - result, 0 - success, 1 - there was an error, check sgx_ferror for error code
+*/
+int32_t SGXAPI sgx_rename_meta(SGX_FILE* stream, const char* old_name, const char* new_name);
 
 #ifdef __cplusplus
 }

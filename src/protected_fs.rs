@@ -1,16 +1,19 @@
-// Copyright 2019 MesaTEE Authors
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 //! Filesystem manipulation operations.
 
@@ -61,6 +64,12 @@ impl ProtectedFile {
             .open_ex(path.as_ref(), key)
     }
 
+    pub fn append_ex<P: AsRef<Path>>(path: P, key: &sgx_key_128bit_t) -> io::Result<ProtectedFile> {
+        OpenOptions::default()
+            .append(true)
+            .open_ex(path.as_ref(), key)
+    }
+
     pub fn create_ex<P: AsRef<Path>>(path: P, key: &sgx_key_128bit_t) -> io::Result<ProtectedFile> {
         OpenOptions::default()
             .write(true)
@@ -84,6 +93,26 @@ impl ProtectedFile {
         meta_gmac: &mut sgx_aes_gcm_128bit_tag_t,
     ) -> io::Result<()> {
         self.inner.get_current_meta_gmac(meta_gmac)
+    }
+
+    pub fn rename_meta<P: AsRef<Path>, Q: AsRef<Path>>(&self, old_name: P, new_name: Q) -> io::Result<()> {
+        self.inner.rename_meta(old_name.as_ref(), new_name.as_ref())
+    }
+
+    pub fn read_at(&self, off: usize, dst: &mut [u8]) -> io::Result<usize> {
+        let pre = self.inner.seek(SeekFrom::Current(0))?;
+        self.inner.seek(SeekFrom::Start(off as u64))?;
+
+        let size = match self.inner.read(dst) {
+            Ok(size) => size,
+            Err(e) => {
+                self.inner.seek(SeekFrom::Start(pre))?;
+                return Err(e)
+            }
+        };
+
+        self.inner.seek(SeekFrom::Start(pre))?;
+        Ok(size)
     }
 }
 
