@@ -1,16 +1,19 @@
-// Copyright 2019 MesaTEE Authors
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 #include "sgx_tprotected_fs.h"
 #include "sgx_tprotected_fs_t.h"
@@ -238,8 +241,20 @@ int32_t sgx_fclear_cache(SGX_FILE* stream)
 int32_t sgx_get_current_meta_gmac(SGX_FILE* stream, sgx_aes_gcm_128bit_tag_t out_gmac)
 {
 	if (stream == NULL)
-		return 1;
+		return -1;
+
 	protected_fs_file* file = (protected_fs_file*)stream;
+
 	return file->get_current_meta_gmac(out_gmac);
+}
+
+int32_t sgx_rename_meta(SGX_FILE* stream, const char* old_name, const char* new_name)
+{
+	if (stream == NULL)
+		return -1;
+
+	protected_fs_file* file = (protected_fs_file*)stream;
+
+	return file->rename_meta(old_name, new_name);
 }
 

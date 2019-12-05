@@ -1,16 +1,19 @@
-// Copyright 2019 MesaTEE Authors
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 #![allow(non_camel_case_types)]
 
 #[cfg(feature = "mesalock_sgx")]
@@ -74,6 +77,9 @@ extern "C" {
         stream: SGX_FILE,
         out_gmac: *mut sgx_aes_gcm_128bit_tag_t,
     ) -> int32_t;
+
+    pub fn sgx_rename_meta(stream: SGX_FILE,
+        old: *const c_char, new: *const c_char) -> int32_t;
 }
 
 fn max_len() -> usize {
@@ -223,61 +229,6 @@ unsafe fn rsgx_fclear_cache(stream: SGX_FILE) -> SysError {
     }
 }
 
-/*
-type uint8_t = u8;
-type uint16_t = u16;
-type uint64_t = u64;
-
-const SGX_KEYID_SIZE: usize = 32;
-const SGX_CPUSVN_SIZE: usize = 16;
-type sgx_isv_svn_t = uint16_t;
-
-struct sgx_key_id_t
-{
-    id: [uint8_t; SGX_KEYID_SIZE],
-}
-
-struct sgx_cpu_svn_t
-{
-    svn: [uint8_t; SGX_CPUSVN_SIZE],
-}
-
-struct sgx_attributes_t
-{
-    flags: uint64_t,
-    xfrm: uint64_t,
-}
-
-struct meta_data_plain_t
-{
-	file_id: uint64_t,
-	major_version: uint8_t,
-	minor_version: uint8_t,
-
-	meta_data_key_id: sgx_key_id_t,
-	cpu_svn: sgx_cpu_svn_t,
-	isv_svn: sgx_isv_svn_t,
-	use_user_kdk_key: uint8_t,
-	attribute_mask: sgx_attributes_t,
-
-	meta_data_gmac: sgx_aes_gcm_128bit_tag_t,
-	
-	update_flag: uint8_t,
-}
-
-struct meta_data_node_t
-{
-	plain_part: meta_data_plain_t,
-	//encrypted_part: meta_data_encrypted_blob_t,
-	//padding: meta_data_padding_t,
-}
-
-struct protected_fs_file {
-	meta_data_node_numbe: int64_t, // for recovery purpose, so it is easy to write this node
-	file_meta_data: meta_data_node_t, // actual data from disk's meta data node
-} 
-*/
-
 unsafe fn rsgx_get_current_meta_gmac(
     stream: SGX_FILE,
     out_gmac: &mut sgx_aes_gcm_128bit_tag_t,
@@ -287,6 +238,21 @@ unsafe fn rsgx_get_current_meta_gmac(
     }
 
     let ret = sgx_get_current_meta_gmac(stream, out_gmac as *mut sgx_aes_gcm_128bit_tag_t);
+    if ret == 0 {
+        Ok(())
+    } else {
+        Err(rsgx_ferror(stream))
+    }
+}
+
+
+unsafe fn rsgx_rename_meta(
+    stream: SGX_FILE,
+    old: &CStr, new: &CStr) -> SysError {
+    if stream.is_null() {
+        return Err(libc::EINVAL);
+    }
+    let ret = sgx_rename_meta(stream, old.as_ptr(), new.as_ptr());
     if ret == 0 {
         Ok(())
     } else {
@@ -647,6 +613,10 @@ impl SgxFileStream {
 
     pub fn get_current_meta_gmac(&self, meta_gmac: &mut sgx_aes_gcm_128bit_tag_t) -> SysError {
         unsafe { rsgx_get_current_meta_gmac(self.stream, meta_gmac) }
+    }
+
+    pub fn rename_meta(&self, old_name: &CStr, new_name: &CStr) -> SysError {
+        unsafe { rsgx_rename_meta(self.stream, old_name, new_name) }
     }
 }
 

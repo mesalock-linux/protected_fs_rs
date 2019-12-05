@@ -1,16 +1,19 @@
-// Copyright 2019 MesaTEE Authors
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 #[cfg(feature = "mesalock_sgx")]
 use std::prelude::v1::*;
@@ -163,6 +166,12 @@ impl SgxFile {
         self.0
             .get_current_meta_gmac(meta_gmac)
             .map_err(Error::from_raw_os_error)
+    }
+
+    pub fn rename_meta(&self, old_name: &Path, new_name: &Path) -> io::Result<()> {
+        let old = cstr(old_name)?;
+        let new = cstr(new_name)?;
+        self.0.rename_meta(&old, &new).map_err(Error::from_raw_os_error)
     }
 }
 
