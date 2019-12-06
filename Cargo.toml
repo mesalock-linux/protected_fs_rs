@@ -27,4 +27,3 @@ sgx_trts = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git", 
 
 [build-dependencies]
 cfg-if      = { version = "0.1.9" }
-cmake       = { version = "0.1" }
