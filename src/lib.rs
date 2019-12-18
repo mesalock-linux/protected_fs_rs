@@ -16,7 +16,6 @@
 
 #![cfg_attr(all(feature = "mesalock_sgx", not(target_env = "sgx")), no_std)]
 #[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
-#[macro_use]
 extern crate sgx_tstd as std;
 
 // For Xargo in edition 2018
