@@ -68,9 +68,12 @@ typedef struct _meta_data_plain
 #define MD_USER_DATA_SIZE (NODE_SIZE*3/4)  // 3072
 COMPILE_TIME_ASSERT(md_user_data_size, MD_USER_DATA_SIZE == 3072);
 
+#ifdef NON_SGX_PROTECTED_FS
+#else
 typedef struct _mc_uuid {
     uint8_t mc_uuid[16];
 } sgx_mc_uuid_t;
+#endif
 
 typedef struct _meta_data_encrypted
 {
